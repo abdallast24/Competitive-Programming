@@ -1,0 +1,199 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.io.ObjectInputStream.GetField;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
+import java.util.TreeMap;
+import java.text.*;
+
+public class Main {
+	static Map<Pair, String> state = new HashMap<>();
+	static Map<Pair, Pair> parent = new HashMap<>();
+	static LinkedList<Pair> q = new LinkedList<>();
+	static LinkedList<String> res = new LinkedList<>();
+
+	public static void main(String[] args) {
+		FastReader in = new FastReader();
+		StringTokenizer st;
+		PrintWriter out = new PrintWriter(System.out);
+		String line;
+		int a, b, c, newA, newB;
+		Pair cur = null, p;
+		while ((line = in.nextLine()) != null) {
+			st = new StringTokenizer(line);
+			a = Integer.parseInt(st.nextToken());
+			b = Integer.parseInt(st.nextToken());
+			c = Integer.parseInt(st.nextToken());
+			state.clear();
+			parent.clear();
+			q.clear();
+			res.clear();
+			p = new Pair(0, 0);
+			state.put(p, "start");
+			parent.put(p, p);
+			q.push(p);
+			while (!q.isEmpty()) {
+				cur = q.remove();
+				if (cur.first == c || cur.second == c) {
+					res.push("success");
+					if (!state.get(cur).equals("start"))
+						res.push(state.get(cur));
+					break;
+				}
+
+				// fill a
+				markVis(a, cur.second, "fill A", cur);
+
+				// fill b
+				markVis(cur.first, b, "fill B", cur);
+
+				// empty a
+				markVis(0, cur.second, "empty A", cur);
+
+				// empty b
+
+				markVis(cur.first, 0, "empty B", cur);
+
+				// b to a
+				newA = Math.min(a, cur.first + cur.second);
+				newB = cur.second - (newA - cur.first);
+				markVis(newA, newB, "pour B A", cur);
+
+				// a to b
+				newB = Math.min(b, cur.first + cur.second);
+				newA = cur.first - (newB - cur.second);
+				markVis(newA, newB, "pour A B", cur);
+
+			}
+			do {
+				cur = parent.get(cur);
+				if (cur.equals(parent.get(cur)))
+					break;
+				res.push(state.get(cur));
+			} while (!cur.equals(parent.get(cur)));
+
+			for (int i = 0; i < res.size(); i++)
+				System.out.print(res.get(i) + "\n");
+
+		}
+		out.close();
+
+	}
+
+	public static void markVis(int a, int second, String string, Pair cur) {
+		if (!state.containsKey(new Pair(a, second))) {
+			state.put(new Pair(a, second), string);
+			parent.put(new Pair(a, second), cur);
+			q.push(new Pair(a, second));
+
+		}
+
+	}
+
+}
+
+class FastReader {
+	BufferedReader br;
+	StringTokenizer st;
+
+	public FastReader() {
+		br = new BufferedReader(new InputStreamReader(System.in));
+
+	}
+
+	public FastReader(File f) throws FileNotFoundException {
+		br = new BufferedReader(new FileReader(f));
+	}
+
+	String next() {
+		while (st == null || !st.hasMoreElements()) {
+			try {
+				st = new StringTokenizer(br.readLine());
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		}
+
+		return st.nextToken();
+
+	}
+
+	int nextInt() {
+
+		return Integer.parseInt(next());
+	}
+
+	double nextDouble() {
+
+		return Double.parseDouble(next());
+	}
+
+	long nextLong() {
+
+		return Long.parseLong(next());
+	}
+
+	String nextLine() {
+		String str = "";
+		try {
+			str = br.readLine();
+
+		} catch (IOException e) {
+
+			e.printStackTrace();
+		}
+		return str;
+
+	}
+}
+
+class Pair {
+	int first, second;
+
+	public Pair(int x, int y) {
+		this.first = x;
+		this.second = y;
+
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + first;
+		result = prime * result + second;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Pair) || obj == null)
+			return false;
+
+		Pair other = (Pair) obj;
+
+		return first == other.first && second == other.second;
+	}
+
+}
